@@ -20,7 +20,7 @@ module "helm_addon" {
     values = [templatefile("${path.module}/values.yaml", {
       aws_region     = var.addon_context.aws_region_name
       eks_cluster_id = var.addon_context.eks_cluster_id
-      image_tag      = coalesce(var.addon_context.eks_cluster_id, "v${var.eks_cluster_version}.1")
+      image_tag      = coalesce(var.addon_context.image_tag, "v${var.eks_cluster_version}.1")
     })]
     },
     var.helm_config
