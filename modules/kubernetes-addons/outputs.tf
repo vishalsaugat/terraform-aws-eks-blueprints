@@ -233,6 +233,11 @@ output "metrics_server" {
   value       = try(module.metrics_server[0], null)
 }
 
+output "kube_state_metrics" {
+  description = "Map of attributes of the Helm release and IRSA created"
+  value       = try(module.kube_state_metrics[0], null)
+}
+
 output "nvidia_device_plugin" {
   description = "Map of attributes of the Helm release and IRSA created"
   value       = try(module.nvidia_device_plugin[0], null)
@@ -281,6 +286,11 @@ output "spark_k8s_operator" {
 output "strimzi_kafka_operator" {
   description = "Map of attributes of the Helm release and IRSA created"
   value       = try(module.strimzi_kafka_operator[0], null)
+}
+
+output "thanos" {
+  description = "Map of attributes of the Helm release and IRSA created"
+  value       = try(module.thanos[0], null)
 }
 
 output "traefik" {

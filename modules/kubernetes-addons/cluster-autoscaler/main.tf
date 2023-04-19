@@ -13,14 +13,14 @@ module "helm_addon" {
   helm_config = merge({
     name        = local.name
     chart       = local.name
-    version     = "9.21.0"
+    version     = "9.28.0"
     repository  = "https://kubernetes.github.io/autoscaler"
     namespace   = local.namespace
     description = "Cluster AutoScaler helm Chart deployment configuration."
     values = [templatefile("${path.module}/values.yaml", {
       aws_region     = var.addon_context.aws_region_name
       eks_cluster_id = var.addon_context.eks_cluster_id
-      image_tag      = "v${var.eks_cluster_version}.0"
+      image_tag      = "v${var.eks_cluster_version}.1"
     })]
     },
     var.helm_config
@@ -38,50 +38,15 @@ module "helm_addon" {
   ]
 
   irsa_config = {
-    create_kubernetes_namespace       = try(var.helm_config.create_namespace, false)
-    kubernetes_namespace              = local.namespace
-    create_kubernetes_service_account = true
-    kubernetes_service_account        = local.service_account
-    irsa_iam_policies                 = [aws_iam_policy.cluster_autoscaler.arn]
+    create_kubernetes_namespace         = try(var.helm_config.create_namespace, false)
+    kubernetes_namespace                = local.namespace
+    create_kubernetes_service_account   = true
+    create_service_account_secret_token = try(var.helm_config["create_service_account_secret_token"], false)
+    kubernetes_service_account          = local.service_account
+    irsa_iam_policies                   = [aws_iam_policy.cluster_autoscaler.arn]
   }
 
   addon_context = var.addon_context
-}
-
-data "aws_iam_policy_document" "cluster_autoscaler" {
-  statement {
-    sid       = ""
-    effect    = "Allow"
-    resources = ["*"]
-
-    actions = [
-      "autoscaling:DescribeAutoScalingGroups",
-      "autoscaling:DescribeAutoScalingInstances",
-      "autoscaling:DescribeLaunchConfigurations",
-      "autoscaling:DescribeTags",
-      "ec2:DescribeInstanceTypes",
-      "ec2:DescribeLaunchTemplateVersions"
-    ]
-  }
-
-  statement {
-    sid       = ""
-    effect    = "Allow"
-    resources = ["*"]
-
-    actions = [
-      "autoscaling:SetDesiredCapacity",
-      "autoscaling:TerminateInstanceInAutoScalingGroup",
-      "ec2:DescribeInstanceTypes",
-      "eks:DescribeNodegroup",
-    ]
-
-    condition {
-      test     = "StringEquals"
-      variable = "autoscaling:ResourceTag/k8s.io/cluster-autoscaler/${var.addon_context.eks_cluster_id}"
-      values   = ["owned"]
-    }
-  }
 }
 
 resource "aws_iam_policy" "cluster_autoscaler" {

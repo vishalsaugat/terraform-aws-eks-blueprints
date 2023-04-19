@@ -21,6 +21,7 @@ resource "aws_eks_addon" "aws_ebs_csi_driver" {
   resolve_conflicts        = try(var.addon_config.resolve_conflicts, "OVERWRITE")
   service_account_role_arn = local.create_irsa ? module.irsa_addon[0].irsa_iam_role_arn : try(var.addon_config.service_account_role_arn, null)
   preserve                 = try(var.addon_config.preserve, true)
+  configuration_values     = try(var.addon_config.configuration_values, null)
 
   tags = merge(
     var.addon_context.tags,
@@ -61,11 +62,12 @@ module "helm_addon" {
   ]
 
   irsa_config = {
-    create_kubernetes_namespace       = try(var.helm_config.create_namespace, false)
-    kubernetes_namespace              = local.namespace
-    create_kubernetes_service_account = true
-    kubernetes_service_account        = local.service_account
-    irsa_iam_policies                 = concat([aws_iam_policy.aws_ebs_csi_driver[0].arn], lookup(var.helm_config, "additional_iam_policies", []))
+    create_kubernetes_namespace         = try(var.helm_config.create_namespace, false)
+    kubernetes_namespace                = local.namespace
+    create_kubernetes_service_account   = true
+    create_service_account_secret_token = try(var.helm_config["create_service_account_secret_token"], false)
+    kubernetes_service_account          = local.service_account
+    irsa_iam_policies                   = concat([aws_iam_policy.aws_ebs_csi_driver[0].arn], lookup(var.helm_config, "additional_iam_policies", []))
   }
 
   # Blueprints
