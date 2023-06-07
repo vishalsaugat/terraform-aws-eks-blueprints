@@ -12,6 +12,7 @@ resource "aws_iam_policy" "karpenter" {
   description = "IAM Policy for Karpenter"
   policy      = data.aws_iam_policy_document.karpenter.json
   path        = var.path
+  tags = var.addon_context.tags
 }
 
 #tfsec:ignore:aws-sqs-enable-queue-encryption
