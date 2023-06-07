@@ -24,7 +24,7 @@ locals {
           settings:
             aws:
               clusterName: ${var.addon_context.eks_cluster_id}
-              tags: ${var.addon_context.tags}
+              tags: ${jsonencode(var.addon_context.tags)}
               clusterEndpoint: ${var.addon_context.aws_eks_cluster_endpoint}
               defaultInstanceProfile: ${var.node_iam_instance_profile}
               interruptionQueueName: ${try(aws_sqs_queue.this[0].name, "")}
